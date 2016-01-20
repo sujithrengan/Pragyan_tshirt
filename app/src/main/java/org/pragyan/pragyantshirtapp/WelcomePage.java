@@ -1,6 +1,8 @@
 package org.pragyan.pragyantshirtapp;
 
 import android.app.ProgressDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -11,11 +13,15 @@ import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,6 +34,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URL;
@@ -36,6 +44,11 @@ import java.util.List;
 
 
 public class WelcomePage extends ActionBarActivity {
+    LinearLayout layoutOfPopup;
+    PopupWindow popupMessage;
+
+    Button couponButton;
+    TextView popupText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,13 +56,43 @@ public class WelcomePage extends ActionBarActivity {
         setContentView(R.layout.activity_welcome_page);
         TextView welcomeText = (TextView) findViewById(R.id.welcomeText);
         welcomeText.setText(welcomeText.getText().toString() + Utilities.username);
-        Button couponButton = (Button) findViewById(R.id.couponSelect);
+         couponButton= (Button) findViewById(R.id.couponSelect);
         couponButton.setText(Utilities.coupon);
         couponButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getBaseContext(), Coupon.class);
-                startActivity(intent);
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                Log.e("bb","bb");
+                if(!Utilities.coupon.equals("meh.")) {
+                    ClipData clip = ClipData.newPlainText("couponCode", Utilities.coupon);
+                    clipboard.setPrimaryClip(clip);
+
+                    Toast.makeText(getApplicationContext(), "Copied to clipboard", Toast.LENGTH_SHORT).show();
+
+                }
+            }
+        });
+
+        TextView hlptxt =(TextView)findViewById(R.id.helpText);
+
+         popupText = new TextView(this);
+        layoutOfPopup = new LinearLayout(this);
+        popupText.setText("This is Popup Window.press OK to dismiss it."); popupText.setPadding(0, 0, 0, 20);
+        layoutOfPopup.setOrientation(LinearLayout.HORIZONTAL);
+        layoutOfPopup.addView(popupText);
+
+
+
+        hlptxt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+
+                Toast.makeText(getApplicationContext(),"Instruction",Toast.LENGTH_SHORT).show();
+                popupMessage = new PopupWindow(layoutOfPopup, ViewGroup.LayoutParams.FILL_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT);
+                popupMessage.setContentView(layoutOfPopup);
+                //popupMessage.showAsDropDown(popupText,0,0);
             }
         });
         if (Utilities.status == 2) {
@@ -61,6 +104,9 @@ public class WelcomePage extends ActionBarActivity {
             else {
                 qrCodeImage.setImageBitmap(bitmap);
             }
+
+            if(Utilities.coupon.equals("meh."))
+            new coupTask().execute();
         }
     }
 
@@ -91,6 +137,7 @@ public class WelcomePage extends ActionBarActivity {
             editor.putInt("status", 0);
             editor.putString("user_name", null);
             editor.putString("user_pass", null);
+            editor.putString("coupon",null);
             editor.apply();
             Intent intent = new Intent(WelcomePage.this, SplashScreen.class);
             startActivity(intent);
@@ -125,7 +172,7 @@ public class WelcomePage extends ActionBarActivity {
             HttpPost httppost = new HttpPost(Utilities.url_qr);
             try {
                 List nameValuePairs = new ArrayList();
-                nameValuePairs.add(new BasicNameValuePair("user_name", Utilities.username));
+                nameValuePairs.add(new BasicNameValuePair("user_roll", Utilities.username));
                 nameValuePairs.add(new BasicNameValuePair("user_pass", Utilities.password));
 
                 httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, "UTF-8"));
@@ -143,6 +190,8 @@ public class WelcomePage extends ActionBarActivity {
             } catch (IOException e) {
             }
             return image;
+
+
         }
 
         @Override
@@ -158,5 +207,74 @@ public class WelcomePage extends ActionBarActivity {
             Toast.makeText(WelcomePage.this, "Image saved to gallery", Toast.LENGTH_LONG).show();
         }
     }
+
+
+    class coupTask extends AsyncTask<String, Void, String> {
+
+
+        @Override
+        protected void onPreExecute() {
+
+
+
+        }
+
+        @Override
+        protected String doInBackground(String... strings) {
+            HttpClient httpclient = new DefaultHttpClient();
+            String coupon="no-coupon";
+            JSONObject jsonObject;
+            HttpPost httppost = new HttpPost(Utilities.url_coup);
+            try {
+                List nameValuePairs = new ArrayList();
+                nameValuePairs.add(new BasicNameValuePair("user_roll", Utilities.username));
+                nameValuePairs.add(new BasicNameValuePair("user_pass", Utilities.password));
+
+                httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, "UTF-8"));
+                URL url2 = new URL(Utilities.url_coup);
+
+                HttpResponse response = httpclient.execute(httppost);
+                HttpEntity httpEntity = null;
+
+                httpEntity = response.getEntity();
+
+
+                String s = EntityUtils.toString(httpEntity);
+                try {
+                    jsonObject = new JSONObject(s);
+                    Log.e("response", s);
+                    Utilities.status = jsonObject.getInt("status");
+                    coupon = jsonObject.getString("data");
+                    Utilities.coupon=coupon;
+
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            } catch (ClientProtocolException e) {
+            } catch (IOException e) {
+            }
+            return coupon;
+
+
+        }
+
+        @Override
+        protected void onPostExecute(String coup) {
+            super.onPostExecute(coup);
+
+            SharedPreferences prefs = Utilities.prefs;
+            SharedPreferences.Editor editor = prefs.edit();
+
+            editor.putString("coupon",Utilities.coupon);
+            editor.apply();
+
+            couponButton.setText(Utilities.coupon);
+
+            Toast.makeText(WelcomePage.this, "Coupon received", Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
 }

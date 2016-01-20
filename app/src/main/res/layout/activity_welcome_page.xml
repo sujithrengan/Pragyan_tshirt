@@ -36,8 +36,9 @@
         android:id="@+id/helpText"
         android:layout_centerHorizontal="true"
         android:layout_below="@+id/couponSelect"
+
         android:textColor="@color/pragyan_grey"
-        android:text="For more info, click above" />
+        android:text="Click here for coupon instructions" />
 
     <ImageView
         android:layout_width="300dp"

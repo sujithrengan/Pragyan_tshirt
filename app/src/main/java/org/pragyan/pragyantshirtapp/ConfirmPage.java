@@ -111,7 +111,7 @@ public class ConfirmPage extends ActionBarActivity {
                 try {
                     jsonObject = new JSONObject(s);
                     Log.e("response", s);
-                    Utilities.status = jsonObject.getInt("status")-1;
+                    Utilities.status = jsonObject.getInt("status");
                     coupon = jsonObject.getString("data");
                     Utilities.coupon=coupon;
 
@@ -140,8 +140,8 @@ public class ConfirmPage extends ActionBarActivity {
                    // case 0:
                      //   Toast.makeText(ConfirmPage.this, error, Toast.LENGTH_SHORT).show();
                      //   break;
-                    //case 2:
                     case 2:
+                    case 3:
                         SharedPreferences prefs = Utilities.prefs;
                         SharedPreferences.Editor editor = prefs.edit();
                         editor.putInt("status", Utilities.status);

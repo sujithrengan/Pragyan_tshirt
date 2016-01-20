@@ -65,7 +65,7 @@ public class LoginActivity extends Activity {
                 else {
                     password = passwordText.getText().toString();
                     //Pass rollNumber and password to the server
-                    //rollNumber+="@nitt.edu";
+
                     new myAsyncTask().execute();
 
 
@@ -108,9 +108,10 @@ public class LoginActivity extends Activity {
             HttpPost httppost = new HttpPost(Utilities.url_auth);
             JSONObject jsonObject;
 
+
             try {
                 List nameValuePairs = new ArrayList();
-                nameValuePairs.add(new BasicNameValuePair("user_email", rollNumber+"@nitt.edu"));
+                nameValuePairs.add(new BasicNameValuePair("user_roll", rollNumber));
                 nameValuePairs.add(new BasicNameValuePair("user_pass", password));
                 httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, "UTF-8"));
                 HttpResponse response = httpclient.execute(httppost);
@@ -166,12 +167,14 @@ public class LoginActivity extends Activity {
                     Utilities.username = rollNumber;
                     editor2.putString("user_pass", password);
                     Utilities.password = password;
+                    editor2.putString("coupon", "meh.");
+                    Utilities.coupon="meh.";
                     editor2.apply();
                     startActivity(i);
                     finish();
                     break;
                 case 3:
-                    Toast.makeText(LoginActivity.this, "Your account is not on the system. Please contact Festember OC", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, "Your account is not on the system. Please contact Pragyan OC", Toast.LENGTH_SHORT).show();
                     rollNumberText.setText("");
                     passwordText.setText("");
                     button.setClickable(true);

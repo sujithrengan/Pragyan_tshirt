@@ -3,6 +3,7 @@ package org.pragyan.pragyantshirtapp;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 
 public class SplashScreen extends Activity {
@@ -18,9 +19,11 @@ public class SplashScreen extends Activity {
         {
             Utilities.username = Utilities.prefs.getString("user_name","User");
             Utilities.password = Utilities.prefs.getString("user_pass","Password");
-            Utilities.coupon=Utilities.prefs.getString("coupon","*midfinger*");
+            Utilities.coupon=Utilities.prefs.getString("coupon","meh.");
         }
         Intent i;
+
+        Log.e("spash",String.valueOf(Utilities.status)+Utilities.coupon);
         switch(Utilities.status)
         {
             case 0:i=new Intent(this,LoginActivity.class);

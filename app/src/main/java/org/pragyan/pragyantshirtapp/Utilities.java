@@ -12,9 +12,10 @@ public class Utilities
     public static String shirtSize;
     public static int status;
     public static SharedPreferences prefs;
-    public static String url_auth = "http://api.pragyan.org/user/auth";
+    public static String url_auth = "http://api.pragyan.org/tshirt/userauth";
     public static String url_reg = "http://api.pragyan.org/tshirt/register";
-    public static String url_qr = "https://festember.com/final15/festember15api/mobile_tshirt_qr.php";
+    public static String url_qr = "http://api.pragyan.org/tshirt/qrcode";
+    public static String url_coup ="http://api.pragyan.org/tshirt/getcoupon";
 
     public static void init()
     {
